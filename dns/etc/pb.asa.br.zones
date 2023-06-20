@@ -1,0 +1,8 @@
+
+zone "pb.asa.br" {
+	type master;
+	file "/etc/bind/db.pb.asa.br";
+	allow-transfer { any; };
+};
+
+
