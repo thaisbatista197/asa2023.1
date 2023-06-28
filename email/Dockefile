@@ -1,0 +1,12 @@
+FROM ubuntu:latest
+
+RUN apt update -y
+RUN apt upgrade -y
+
+RUN apt install postfix telnet -y
+
+EXPOSE 25/tcp
+EXPOSE 587/tcp
+
+CMD ["/usr/sbin/postfix", "start-fg"]
+
