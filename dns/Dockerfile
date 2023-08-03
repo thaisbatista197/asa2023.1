@@ -1,14 +1,16 @@
-FROM ubuntu:latest
+FROM debian:latest
 
-RUN apt-get update -y
+RUN apt-get update \
+    && apt-get install -y \
+    bind9 \
+    bind9-doc \
+    bind9utils \
+    dnsutils \
+    iputils-ping \
+    nano
+
 RUN apt-get upgrade -y
 
-RUN apt-get install bind9 bind9-utils dnsutils -y
+EXPOSE 53
 
-COPY ./etc/* /etc/bind
-
-EXPOSE 53/tcp
-EXPOSE 53/udp
-EXPOSE 953/tcp
-
-CMD ["/usr/sbin/named", "-g", "-c", "/etc/bind/named.conf", "-u", "bind"]
+CMD /usr/sbin/named ; tail -F /dev/null

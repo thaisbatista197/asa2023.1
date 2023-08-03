@@ -1,62 +1,74 @@
-# comentario para testar
-version: '3'
 services:
-
-  web01:
+  intranet:
     build:
-      context: ./web01
-      dockerfile: Dockerfile
-    image: web01
-    container_name: web01
-    restart: always
-    tty: true
+      context: ./
+      dockerfile: intranet/Dockerfile
+    image: intranet
+    container_name: intranet
     networks:
-      - asa-network
-
-  web02:
+      - pb-network
+  portal:
     build:
-      context: ./web02
-      dockerfile: Dockerfile
-    image: web02
-    container_name: web02
-    restart: always
-    tty: true
+      context: ./
+      dockerfile: portal/Dockerfile
+    image: portal
+    container_name: portal
     networks:
-      - asa-network
-      
+      - pb-network
   proxy:
     build:
-      context: ./proxy
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: proxy/Dockerfile
     image: proxy
     container_name: proxy
-    hostname: www.asa.br
-    restart: always
-    tty: true
     ports:
       - "8080:80"
     depends_on:
-      - web01
-      - web02
+      - intranet
+      - portal
     networks:
-      - asa-network
-
+      - pb-network
   dns:
-    build:
-      context: ./dns
-      dockerfile: Dockerfile
+    build: ./dns
     image: dns
     container_name: dns
-    hostname: ns1.asa.br
     restart: always
     tty: true
     ports:
-      - "53:53/tcp"
       - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - ./dns/primary:/etc/bind
     networks:
-      - asa-network
- 
+      - pb-network  
+  email:
+    build: ./email
+    image: email
+    container_name: email
+    ports:
+      - "25:25/tcp"
+      - "100:100/tcp"
+      - "143:143/tcp"
+      - "587:587/tcp"
+      - "993:993/tcp"
+      - "995:995/tcp"
+    networks:
+      - pb-network
+  webmail:
+      build:
+        context: ./webmail
+      image: webmail
+      container_name: webmail
+      restart: always
+      tty: true
+      volumes:
+        - ./webmail/rainloop:/var/www/html/rainloop
+      depends_on:
+        - email
+      networks:
+        - pb-network
+
 #Docker Networks
 networks:
-  asa-network:
+  pb-network:
     driver: bridge
